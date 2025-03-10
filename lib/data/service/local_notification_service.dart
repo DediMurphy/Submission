@@ -43,15 +43,14 @@ class LocalNotificationService {
   Future<void> configureLocalTimeZone() async {
     tz.initializeTimeZones();
     final String timeZoneName = await FlutterTimezone.getLocalTimezone();
-    print("Time Zone: $timeZoneName"); // Debugging
+    print("Time Zone: $timeZoneName");
     tz.setLocalLocation(tz.getLocation(timeZoneName));
   }
 
   tz.TZDateTime _nextInstanceOfAM() {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime.from(
-        DateTime(now.year, now.month, now.day, 11, 00), tz.local);
-
+    tz.TZDateTime scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, 11, 0);
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
