@@ -50,10 +50,14 @@ class LocalDatabaseProvider extends ChangeNotifier {
   Future<void> loadRestaurantById(String id) async {
     try {
       _restaurant = await _service.getItemById(id);
-      _message = "Your data is loaded";
+      if (_restaurant == null) {
+        _message = "Data not found";
+      } else {
+        _message = "Your data is loaded";
+      }
       notifyListeners();
     } catch (e) {
-      _message = "Failed to load your data";
+      _message = "Failed to load your data. Please check your connection.";
       notifyListeners();
     }
   }
@@ -71,7 +75,9 @@ class LocalDatabaseProvider extends ChangeNotifier {
   }
 
   bool checkItemBookmark(String id) {
-    final isSameTourism = _restaurant!.id == id;
-    return isSameTourism;
+    if (_restaurant == null) {
+      return false;
+    }
+    return _restaurant!.id == id;
   }
 }

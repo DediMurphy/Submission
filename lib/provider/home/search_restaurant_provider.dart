@@ -34,8 +34,11 @@ class SearchRestaurantProvider extends ChangeNotifier {
       } else {
         _resultState = RestaurantListLoadedState(result.restaurants);
       }
-    } catch (e) {
-      _resultState = RestaurantListErrorState(e.toString());
+    } catch (_) {
+      _resultState = RestaurantListErrorState(
+          "Tidak dapat terhubung ke server. Pastikan Anda memiliki koneksi internet.");
+    } finally {
+      notifyListeners();
     }
 
     notifyListeners();

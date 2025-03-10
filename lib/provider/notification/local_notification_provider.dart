@@ -12,7 +12,6 @@ class LocalNotificationProvider extends ChangeNotifier {
 
   bool? get permission => _permission;
 
-  // todo-02-provider-01: add the state
   List<PendingNotificationRequest> pendingNotificationRequests = [];
 
   Future<void> requestPermissions() async {
@@ -20,7 +19,6 @@ class LocalNotificationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // todo-02-provider-02: create a schedule notification
   void scheduleDailyNotification() {
     _notificationId += 1;
     flutterNotificationService.scheduleDailyTenAMNotification(
@@ -28,14 +26,12 @@ class LocalNotificationProvider extends ChangeNotifier {
     );
   }
 
-  // todo-02-provider-03: show a list of pending notification
   Future<void> checkPendingNotificationRequests(BuildContext context) async {
     pendingNotificationRequests =
-        await flutterNotificationService.pendingNotificationRequests();
+    await flutterNotificationService.pendingNotificationRequests();
     notifyListeners();
   }
 
-  // todo-02-provider-04: cancel a notification
   Future<void> cancelNotification(int id) async {
     await flutterNotificationService.cancelNotification(id);
   }

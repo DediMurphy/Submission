@@ -11,32 +11,45 @@ class ApiServices {
   static const String _baseUrl = "https://restaurant-api.dicoding.dev";
 
   Future<RestaurantListResponse> getRestaurantList() async {
-    final response = await http.get(Uri.parse("$_baseUrl/list"));
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/list"));
 
-    if (response.statusCode == 200) {
-      return RestaurantListResponse.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load restaurant list');
+      if (response.statusCode == 200) {
+        return RestaurantListResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception(
+            'Gagal memuat daftar restoran. Silakan coba lagi nanti.');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan. Periksa koneksi internet Anda.');
     }
   }
 
   Future<RestaurantDetailResponse> getRestaurantDetail(String id) async {
-    final response = await http.get(Uri.parse("$_baseUrl/detail/$id"));
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/detail/$id"));
 
-    if (response.statusCode == 200) {
-      return RestaurantDetailResponse.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load restaurant detail');
+      if (response.statusCode == 200) {
+        return RestaurantDetailResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Gagal Memuat halaman detail');
+      }
+    } catch (e) {
+      throw Exception('Terjadi Kesalahan. Periksa Internet anda');
     }
   }
 
   Future<RestaurantSearchResponse> searchRestaurant(String query) async {
-    final response = await http.get(Uri.parse("$_baseUrl/search?q=$query"));
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/search?q=$query"));
 
-    if (response.statusCode == 200) {
-      return RestaurantSearchResponse.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to fetch search results');
+      if (response.statusCode == 200) {
+        return RestaurantSearchResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('search tidak ditemukan');
+      }
+    } catch (e) {
+      throw Exception('Terjadi Kesalahan. Periksa Internet anda');
     }
   }
 

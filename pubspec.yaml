@@ -45,6 +45,8 @@ dependencies:
   test: ^1.25.15
   mockito: ^5.4.5
   build_runner: ^2.4.15
+  cached_network_image: ^3.3.0
+
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:restaurantapp/data/model/restaurant_detail_response.dart';
+
+import '../../provider/detail/review_detail_provider.dart';
 
 class BodyOfDetailScreenWidget extends StatefulWidget {
   const BodyOfDetailScreenWidget({
@@ -19,6 +23,15 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
   final TextEditingController reviewController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<ReviewProvider>(context, listen: false)
+          .fetchReviews(widget.restaurant.id);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
@@ -30,13 +43,12 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
               tag: "restaurant_${widget.restaurant.id}",
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  widget.restaurant.imageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: 200,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image_not_supported, size: 200),
+                child: CachedNetworkImage(
+                  imageUrl: widget.restaurant.imageUrl,
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) =>
+                      Image.asset('assets/images/placeholder.png'),
                 ),
               ),
             ),
@@ -64,10 +76,7 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
                 ),
                 Row(
                   children: [
-                    const Icon(
-                      Icons.favorite,
-                      color: Colors.pink,
-                    ),
+                    const Icon(Icons.favorite, color: Colors.pink),
                     const SizedBox(width: 4),
                     Text(
                       widget.restaurant.rating.toString(),
@@ -96,7 +105,11 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
             _buildSectionTitle(context, "Menu Minuman:"),
             _buildMenuList<Drink>(
                 widget.restaurant.menus.drinks, Icons.local_drink),
-            _buildReviewSection(context, widget.restaurant.customerReviews),
+            Consumer<ReviewProvider>(
+              builder: (context, provider, _) {
+                return _buildReviewSection(context, provider.reviews);
+              },
+            ),
           ],
         ),
       ),
@@ -123,18 +136,18 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
   }
 
   Widget _buildReviewSection(
-      BuildContext context, List<CustomerReview> reviews) {
+      BuildContext context, List<Map<String, String>> reviews) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle(context, "Ulasan Pelanggan:"),
         _buildReviewList(reviews),
-        _buildReviewForm(),
+        _buildReviewForm(context),
       ],
     );
   }
 
-  Widget _buildReviewList(List<CustomerReview> reviews) {
+  Widget _buildReviewList(List<Map<String, String>> reviews) {
     if (reviews.isEmpty) {
       return const Text("Belum ada ulasan.");
     }
@@ -147,14 +160,14 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
                     leading: const Icon(Icons.person),
-                    title: Text(review.name,
+                    title: Text(review["name"]!,
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(review.review),
+                        Text(review["review"]!),
                         Text(
-                          review.date,
+                          review["date"]!,
                           style:
                               const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
@@ -167,7 +180,7 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
     );
   }
 
-  Widget _buildReviewForm() {
+  Widget _buildReviewForm(BuildContext context) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -204,13 +217,13 @@ class _BodyOfDetailScreenWidgetState extends State<BodyOfDetailScreenWidget> {
                 onPressed: () {
                   if (nameController.text.isNotEmpty &&
                       reviewController.text.isNotEmpty) {
-                    setState(() {
-                      widget.restaurant.customerReviews.add(CustomerReview(
-                        name: nameController.text,
-                        review: reviewController.text,
-                        date: DateTime.now().toLocal().toString().split(' ')[0],
-                      ));
-                    });
+                    Provider.of<ReviewProvider>(context, listen: false)
+                        .submitReview(
+                      widget.restaurant.id,
+                      nameController.text,
+                      reviewController.text,
+                    );
+
                     nameController.clear();
                     reviewController.clear();
                   }

@@ -43,13 +43,15 @@ class LocalNotificationService {
   Future<void> configureLocalTimeZone() async {
     tz.initializeTimeZones();
     final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+    print("Time Zone: $timeZoneName"); // Debugging
     tz.setLocalLocation(tz.getLocation(timeZoneName));
   }
 
   tz.TZDateTime _nextInstanceOfAM() {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, 11, 00);
+    tz.TZDateTime scheduledDate = tz.TZDateTime.from(
+        DateTime(now.year, now.month, now.day, 11, 00), tz.local);
+
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
@@ -112,9 +114,9 @@ class LocalNotificationService {
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
-      'Daily scheduled notification title',
-      'This is a body of daily scheduled notification',
-      datetimeSchedule,
+      "It's a brand new day! ☀️",
+      "Stay awesome and make today amazing! 💪",
+      _nextInstanceOfAM(),
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:

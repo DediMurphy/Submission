@@ -73,17 +73,24 @@ class LocalDatabaseService {
 
   Future<RestaurantDetail?> getItemById(String id) async {
     final db = await _initializeDb();
-    final results = await db.query(
-      _tableName,
-      where: "id = ?",
-      whereArgs: [id],
-      limit: 1,
-    );
+    try {
+      final results = await db.query(
+        _tableName,
+        where: "id = ?",
+        whereArgs: [id],
+        limit: 1,
+      );
 
-    if (results.isNotEmpty) {
-      return _mapToRestaurant(results.first);
+      if (results.isNotEmpty) {
+        return _mapToRestaurant(results.first);
+      } else {
+        print("Restaurant with ID: $id not found in database");
+        return null;
+      }
+    } catch (e) {
+      print("Database error: $e");
+      return null;
     }
-    return null;
   }
 
   Future<int> removeItem(String id) async {
